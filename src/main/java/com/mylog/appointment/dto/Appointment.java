@@ -25,7 +25,6 @@ public class Appointment {
     @Column(name="appointment_date")
     private LocalDateTime appointmentDate;
 
-    private String status; // e.g., PENDING, COMPLETED
+    private String status; // e.g., PENDING, APPROVED,COMPLETED
 
-    // Getters and setters
 }

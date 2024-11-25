@@ -43,7 +43,6 @@ public class MetricsController {
     private void validateDateRange(String startDateStr, String endDateStr) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-        // Null and empty checks
         if (StringUtils.isBlank(startDateStr)) {
             throw new InvalidDateRangeException("Start date cannot be null or empty.");
         }

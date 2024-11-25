@@ -9,14 +9,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.annotation.CircuitBreaker;
+import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.support.RetryTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.format.DateTimeFormatter;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
+@EnableRetry
 public class AppointmentService {
 
     private static final String NOTIFICATION_SERVICE_URL = "http://notification-service/api/notifications";
@@ -25,6 +30,9 @@ public class AppointmentService {
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @Autowired
+    private RetryTemplate retryTemplate;
 
     @Autowired
     private AppointmentRepository appointmentRepository;
@@ -43,13 +51,11 @@ public class AppointmentService {
         return savedAppointment;
     }
 
-    // Retrieve appointment by ID
     public Optional<Appointment> getAppointmentById(Long id) {
         logger.info("Fetching appointment with ID: {}", id);
         return appointmentRepository.findById(id);
     }
 
-    // Update appointment status
     public Appointment updateAppointmentStatus(Long id, String newStatus) {
         Optional<Appointment> optionalAppointment = appointmentRepository.findById(id);
         if (optionalAppointment.isPresent()) {
@@ -63,27 +69,42 @@ public class AppointmentService {
         }
     }
 
+    public Appointment saveAppointment(Appointment appointment) {
+        return appointmentRepository.save(appointment);
+    }
 
-    // Delete appointment
+
     public void deleteAppointment(Long id) {
         logger.info("Deleting appointment with ID: {}", id);
         appointmentRepository.deleteById(id);
     }
 
-    // Trigger notification to Notification Service
+    /**
+     * Sends a notification for the given visitor and appointment.
+     *
+     * @param visitor    the visitor for whom the notification is sent
+     * @param appointment the appointment details
+     */
+    @Async
     public void sendNotification(Visitor visitor, Appointment appointment) {
+        Notification notification = new Notification();
+        notification.setRecipient(visitor.getEmail());
+        notification.setMessage(formatScheduleMessage(appointment));
+        notification.setType("EMAIL");
+        notification.setAppointment(appointment);
+
         try {
-            Notification notification = new Notification();
-            notification.setRecipient(visitor.getEmail());
-            String messageContent = formatScheduleMessage(appointment);
-            notification.setMessage(messageContent);
-            notification.setType("EMAIL");
-            notification.setAppointment(appointment);
-                restTemplate.postForObject(NOTIFICATION_SERVICE_URL, notification, ResponseEntity.class);
-            logger.info("Sent notification for visitor: {}", visitor.getName());
-            notificationRepository.save(notification);
+            logger.info("Attempting to send notification to {}", visitor.getEmail());
+            boolean success = retrySendNotification(notification);
+
+            if (success) {
+                logger.error("Notification sent successfully for visitor: {}", visitor.getName());
+                notificationRepository.save(notification);
+            } else {
+                logger.warn("Failed to send notification after retries for visitor: {}", visitor.getName());
+            }
         } catch (Exception e) {
-            logger.error("Failed to send notification", e);
+            logger.error("Failed to send notification for visitor: {}", visitor.getName(), e);
         }
     }
 
@@ -96,6 +117,38 @@ public class AppointmentService {
                 visitor.getPurpose(),
                 appointment.getAppointmentDate().format(formatter)
         );
+    }
+
+
+
+
+    /**
+     * Retry logic for sending notifications.
+     *
+     * @param notification the notification to be sent
+     * @return true if the notification was sent successfully, false otherwise
+     */
+    //@CircuitBreaker(maxAttempts = 3, openTimeout = 5000, resetTimeout = 20000)
+    public boolean retrySendNotification(Notification notification) {
+        try {
+            return retryTemplate.execute(context -> {
+                ResponseEntity<?> response = restTemplate.postForObject(
+                        NOTIFICATION_SERVICE_URL, notification, ResponseEntity.class);
+                return response != null && response.getStatusCode().is2xxSuccessful();
+            }, context -> {
+                logger.error("Failed to send notification after {} attempts", context.getRetryCount());
+                return false;
+            });
+        } catch (Exception e) {
+            logger.error("Failed to send Notification: {}", e.getMessage());
+        }
+        return false;
+    }
+
+    //@Recover
+    public boolean fallbackSendNotification(RuntimeException e, Notification notification) {
+        logger.error("CircuitBreaker is open. Fallback triggered: {}", e.getMessage());
+        return false;
     }
 
     private String formatScheduleMessage1(Appointment appointment) {

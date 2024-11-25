@@ -13,7 +13,6 @@ public class JacksonConfig {
     @Bean
     @Primary
     public ObjectMapper objectMapper(Jackson2ObjectMapperBuilder builder) {
-        System.out.println("Config is starting.");
         ObjectMapper objectMapper = builder.createXmlMapper(false).build();
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS,false);

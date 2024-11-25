@@ -12,7 +12,6 @@ public class MetricsReport {
     private long pendingAppointmentsMoreThanOneHour;
     private long pendingAppointmentsLessThanOneHour;
 
-    // Getters and Setters
 
     public static class Builder {
 
