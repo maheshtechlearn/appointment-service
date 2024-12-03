@@ -3,6 +3,7 @@ package com.mylog.appointment.service;
 import com.mylog.appointment.dto.Appointment;
 import com.mylog.appointment.dto.Notification;
 import com.mylog.appointment.dto.Visitor;
+import com.mylog.appointment.exception.AppointmentNotFoundException;
 import com.mylog.appointment.repository.AppointmentRepository;
 import com.mylog.appointment.repository.NotificationRepository;
 import org.slf4j.Logger;
@@ -65,7 +66,7 @@ public class AppointmentService {
             logger.info("Updated appointment status to: {}", newStatus);
             return updatedAppointment;
         } else {
-            throw new RuntimeException("Appointment not found with ID: " + id);
+            throw new AppointmentNotFoundException("Appointment not found with ID: " + id);
         }
     }
 

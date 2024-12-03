@@ -2,6 +2,7 @@ package com.mylog.appointment.controller;
 
 import com.mylog.appointment.dto.Appointment;
 import com.mylog.appointment.dto.Visitor;
+import com.mylog.appointment.exception.AppointmentNotFoundException;
 import com.mylog.appointment.service.AppointmentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,11 +70,15 @@ public class AppointmentController {
     @PutMapping("/{id}/status")
     public ResponseEntity<Appointment> updateAppointmentStatus(@PathVariable Long id, @RequestParam String status) {
         logger.info("Updating status of appointment with ID {} to {}", id, status);
+        Appointment updatedAppointment = null;
         try {
-            Appointment updatedAppointment = appointmentService.updateAppointmentStatus(id, status);
+            updatedAppointment = appointmentService.updateAppointmentStatus(id, status);
+            if (null == updatedAppointment) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
             logger.info("Appointment status updated successfully: {}", updatedAppointment);
             return new ResponseEntity<>(updatedAppointment, HttpStatus.OK);
-        } catch (RuntimeException e) {
+        } catch (AppointmentNotFoundException e) {
             logger.error("Failed to update appointment status for ID {}: {}", id, e.getMessage());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
