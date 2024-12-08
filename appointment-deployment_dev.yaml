@@ -20,30 +20,6 @@ spec:
           image: mahesh541/api-appointment-service:latest
           ports:
             - containerPort: 8083
-          env: # Setting Enviornmental Variables
-            - name: DB_HOST   # Setting Database host address from configMap
-              valueFrom:
-                configMapKeyRef:
-                  name: mylogo-config
-                  key: host
-
-            - name: DB_NAME  # Setting Database name from configMap
-              valueFrom:
-                configMapKeyRef:
-                  name: mylogo-config
-                  key: dbName
-
-            - name: DB_USERNAME  # Setting Database username from Secret
-              valueFrom:
-                secretKeyRef:
-                  name: mylogo-secrets
-                  key: username
-
-            - name: DB_PASSWORD # Setting Database password from Secret
-              valueFrom:
-                secretKeyRef:
-                  name: mylogo-secrets
-                  key: password
 
 ---
 
