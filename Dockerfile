@@ -6,8 +6,8 @@ EXPOSE 8080
 
 
 # Copy the JAR file into the container
-ADD target/appointmentservice-0.0.1-SNAPSHOT.jar appointmentservice-0.0.1-SNAPSHOT.jar
+ADD target/appointment-service-0.0.1-SNAPSHOT.jar appointment-service-0.0.1-SNAPSHOT.jar
 
 
 # Command to run the application
-ENTRYPOINT ["java", "-jar", "appointmentservice-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "appointment-service-0.0.1-SNAPSHOT.jar"]
