@@ -65,20 +65,20 @@ public class AppointmentControllerTest {
     public void testGetAppointmentById_Response_null(){
         Appointment appointment=new Appointment();
         when(appointmentService.getAppointmentById(anyLong())).thenReturn(Optional.empty());
-        assertEquals(HttpStatus.NOT_FOUND,appointmentController.getAppointmentById(1L).getStatusCode());
+        assertThrows(AppointmentNotFoundException.class,()->appointmentController.getAppointmentById(1L).getStatusCode());
     }
 
 
 
     @Test
-    public void testupdateAppointmentStatus(){
+    public void testUpdateAppointmentStatus(){
         Appointment appointment=new Appointment();
         when(appointmentService.updateAppointmentStatus(anyLong(),anyString())).thenReturn(appointment);
         assertNotNull(appointmentController.updateAppointmentStatus(1L,"pending"));
     }
 
     @Test
-    public void testupdateAppointmentStatus_Response_null(){
+    public void testUpdateAppointmentStatus_Response_null(){
         when(appointmentRepository.findById(anyLong())).thenReturn(Optional.empty());
         when(appointmentService.updateAppointmentStatus(anyLong(),anyString())).thenThrow(AppointmentNotFoundException.class);
         assertEquals(HttpStatus.NOT_FOUND,appointmentController.updateAppointmentStatus(0L,null).getStatusCode());

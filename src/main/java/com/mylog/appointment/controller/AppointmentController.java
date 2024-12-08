@@ -56,7 +56,7 @@ public class AppointmentController {
             return new ResponseEntity<>(appointment.get(), HttpStatus.OK);
         } else {
             logger.warn("Appointment with ID {} not found", id);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw new AppointmentNotFoundException("Appointment Not Found");
         }
     }
 
