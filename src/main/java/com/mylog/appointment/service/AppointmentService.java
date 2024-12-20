@@ -6,6 +6,7 @@ import com.mylog.appointment.dto.Visitor;
 import com.mylog.appointment.exception.AppointmentNotFoundException;
 import com.mylog.appointment.repository.AppointmentRepository;
 import com.mylog.appointment.repository.NotificationRepository;
+import com.mylog.appointment.repository.VisitorRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
@@ -41,12 +43,19 @@ public class AppointmentService {
     @Autowired
     private NotificationRepository notificationRepository;
 
+    @Autowired
+    private VisitorRepository visitorRepository;
+
 
 
     public Appointment createAppointment(Visitor visitor, String status) {
         Appointment appointment = new Appointment();
-        appointment.setVisitor(visitor);
+
         appointment.setStatus(status);
+        appointment.setAppointmentDate(LocalDateTime.now());
+        Visitor visitorData=visitorRepository.save(visitor);
+        visitor.setId(visitorData.getId());
+        appointment.setVisitor(visitor);
         Appointment savedAppointment = appointmentRepository.save(appointment);
         logger.info("Created new appointment with status: {}", status);
         return savedAppointment;

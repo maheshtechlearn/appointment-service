@@ -1,10 +1,14 @@
 package com.mylog.appointment.domain;
 
+import com.mylog.appointment.dto.Visitor;
+import com.mylog.appointment.dto.VisitorDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -23,5 +27,9 @@ public class VisitorMetricsFacade {
         metrics.put("PENDING_APPOINTMENTS_LESS_THAN_ONE_HOUR", visitorMetricsStrategyFactory.getStrategy("PENDING_APPOINTMENTS_LESS_THAN_ONE_HOUR").calculate(startDate, endDate));
 
         return metrics;
+    }
+
+    public List<VisitorDTO> getVisitors(LocalDateTime startDate, LocalDateTime endDate) {
+        return new ArrayList<>();
     }
 }
