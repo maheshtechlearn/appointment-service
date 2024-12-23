@@ -20,6 +20,35 @@ spec:
           image: mahesh541/api-appointment-service:latest
           ports:
             - containerPort: 8083
+          env: # Setting Enviornmental Variables
+            - name: DB_HOST   # Setting Database host address from configMap
+              valueFrom:
+                configMapKeyRef:
+                  name: mylogo-config
+                  key: host
+
+            - name: DB_NAME  # Setting Database name from configMap
+              valueFrom:
+                configMapKeyRef:
+                  name: mylogo-config
+                  key: dbName
+
+            - name: DB_USERNAME  # Setting Database username from Secret
+              valueFrom:
+                secretKeyRef:
+                  name: mylogo-secrets
+                  key: username
+
+            - name: DB_PASSWORD # Setting Database password from Secret
+              valueFrom:
+                secretKeyRef:
+                  name: mylogo-secrets
+                  key: password
+            - name: INSTANCE_CONNECTION_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: mylogo-secrets
+                  key: instanceName
 
 ---
 
@@ -35,4 +64,4 @@ spec:
     - protocol: "TCP"
       port: 8083 # The port that the service is running on in the cluster
       targetPort: 8083 # The port exposed by the service
-  type: NodePort # type of the service.
+  type: LoadBalancer # type of the service.
