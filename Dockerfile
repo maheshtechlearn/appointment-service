@@ -2,7 +2,7 @@
 FROM eclipse-temurin:17-jre-alpine
 
 # Expose the port your application runs on
-EXPOSE 8080
+EXPOSE 2346
 
 # Create a directory in the container to store persistent data
 RUN mkdir -p /app/data

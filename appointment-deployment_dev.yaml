@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: appointment-service-deployment
+  name: appointment-service
   namespace: dev
   labels:
     app: appointment-service
@@ -19,7 +19,7 @@ spec:
         - name: appointment-service
           image: mahesh541/api-appointment-service:latest
           ports:
-            - containerPort: 8083
+            - containerPort: 2346
           env: # Setting Enviornmental Variables
             - name: DB_HOST   # Setting Database host address from configMap
               valueFrom:
@@ -55,13 +55,13 @@ spec:
 apiVersion: v1 # Kubernetes API version
 kind: Service # Kubernetes resource kind we are creating
 metadata: # Metadata of the resource kind we are creating
-  name: appointment-service-deployment
+  name: appointment-service
   namespace: dev
 spec:
   selector:
     app: appointment-service
   ports:
-    - protocol: "TCP"
-      port: 8083 # The port that the service is running on in the cluster
-      targetPort: 8083 # The port exposed by the service
+    - protocol: TCP
+      port: 80 # The port that the service is running on in the cluster
+      targetPort: 2346 # The port exposed by the service
   type: LoadBalancer # type of the service.
